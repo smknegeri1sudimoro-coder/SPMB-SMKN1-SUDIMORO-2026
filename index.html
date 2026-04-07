@@ -874,7 +874,7 @@
         doc.save(`FORMULIR_SPMB_${data.nama.replace(/\s/g, '_')}.pdf`);
     }
     
-    // ========== ADMIN MODAL ==========
+        // ========== ADMIN MODAL ==========
     function openAdminModal() {
         const password = prompt("🔐 Masukkan password admin:", "");
         if (password === "admin123") {
@@ -905,114 +905,121 @@
         allData.forEach((data, index) => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${index + 1}</td>
-                <td>${data.no_pendaftaran || '-'}</td>
-                <td>${data.nama || '-'}</td>
-                <td>${data.nisn || '-'}</td>
-                <td>${data.jk || '-'}</td>
-                <td>${data.nohp || '-'}</td>
-                <td>${data.jurusan1 || '-'}</td>
-                <td>${data.tgl_daftar || '-'}</td>
+                 <td>${index + 1}</td>
+                 <td>${data.no_pendaftaran || '-'}</td>
+                 <td>${data.nama || '-'}</td>
+                 <td>${data.nisn || '-'}</td>
+                 <td>${data.jk || '-'}</td>
+                 <td>${data.nohp || '-'}</td>
+                 <td>${data.jurusan1 || '-'}</td>
+                 <td>${data.tgl_daftar || '-'}</td>
             `;
             tbody.appendChild(tr);
         });
     }
     
-   function exportToCSV() {
-    const allData = getAllData();
-    if (allData.length === 0) {
-        showAlert("Tidak ada data untuk di-export!", "error");
-        return;
-    }
-    
-    // Gunakan tanda kutip dan delimiter yang benar
-    const delimiter = ",";  // Pemisah kolom (comma)
-    const newline = "\n";   // Pemisah baris
-    
-    // Header kolom (sesuai dengan data)
-    const headers = [
-        "No", 
-        "No Pendaftaran", 
-        "Tanggal Daftar", 
-        "Nama Lengkap", 
-        "NISN", 
-        "Tempat Lahir", 
-        "Tanggal Lahir", 
-        "Jenis Kelamin", 
-        "Alamat", 
-        "No HP", 
-        "Email", 
-        "Nama Ayah", 
-        "Nama Ibu", 
-        "NIK", 
-        "No KK", 
-        "Tanggal Terbit KK", 
-        "Asal Sekolah", 
-        "NPSN", 
-        "Kartu Bantuan", 
-        "Jurusan Pilihan 1", 
-        "Jurusan Pilihan 2"
-    ];
-    
-    // Fungsi untuk membungkus nilai dengan tanda kutip (jika ada koma di dalamnya)
-    function escapeCSV(value) {
-        if (value === undefined || value === null) return "";
-        let stringValue = String(value);
-        // Jika ada koma, kutip, atau newline, bungkus dengan tanda kutip
-        if (stringValue.includes(",") || stringValue.includes('"') || stringValue.includes("\n")) {
-            stringValue = stringValue.replace(/"/g, '""'); // gandakan tanda kutip
-            stringValue = `"${stringValue}"`;
+    // ========== EXPORT CSV YANG BENAR (PER KOLOM) ==========
+    function exportToCSV() {
+        const allData = getAllData();
+        
+        if (allData.length === 0) {
+            showAlert("Tidak ada data untuk di-export!", "error");
+            return;
         }
-        return stringValue;
-    }
-    
-    // Buat baris header
-    let csv = headers.map(escapeCSV).join(delimiter) + newline;
-    
-    // Buat baris data
-    allData.forEach((data, index) => {
-        const row = [
-            index + 1,                                    // No
-            escapeCSV(data.no_pendaftaran || ""),         // No Pendaftaran
-            escapeCSV(data.tgl_daftar || ""),             // Tanggal Daftar
-            escapeCSV(data.nama || ""),                   // Nama Lengkap
-            escapeCSV(data.nisn || ""),                   // NISN
-            escapeCSV(data.tempat_lahir || ""),           // Tempat Lahir
-            escapeCSV(data.tgl_lahir || ""),              // Tanggal Lahir
-            escapeCSV(data.jk || ""),                     // Jenis Kelamin
-            escapeCSV(data.alamat || ""),                 // Alamat
-            escapeCSV(data.nohp || ""),                   // No HP
-            escapeCSV(data.email || ""),                  // Email
-            escapeCSV(data.ayah || ""),                   // Nama Ayah
-            escapeCSV(data.ibu || ""),                    // Nama Ibu
-            escapeCSV(data.nik || ""),                    // NIK
-            escapeCSV(data.kk || ""),                     // No KK
-            escapeCSV(data.tgl_kk || ""),                 // Tanggal Terbit KK
-            escapeCSV(data.asal_sekolah || ""),           // Asal Sekolah
-            escapeCSV(data.npsn || ""),                   // NPSN
-            escapeCSV(data.bantuan || ""),                // Kartu Bantuan
-            escapeCSV(data.jurusan1 || ""),               // Jurusan Pilihan 1
-            escapeCSV(data.jurusan2 || "")                // Jurusan Pilihan 2
+        
+        console.log("Jumlah data:", allData.length);
+        console.log("Contoh data pertama:", allData[0]);
+        
+        // Gunakan tab sebagai pemisah (lebih aman daripada koma)
+        const delimiter = "\t";  // TAB sebagai pemisah kolom
+        const newline = "\r\n";
+        
+        // Header kolom
+        const headers = [
+            "No",
+            "No Pendaftaran", 
+            "Tanggal Daftar", 
+            "Nama Lengkap", 
+            "NISN", 
+            "Tempat Lahir", 
+            "Tanggal Lahir", 
+            "Jenis Kelamin", 
+            "Alamat", 
+            "No HP", 
+            "Email", 
+            "Nama Ayah", 
+            "Nama Ibu", 
+            "NIK", 
+            "No KK", 
+            "Tanggal Terbit KK", 
+            "Asal Sekolah", 
+            "NPSN", 
+            "Kartu Bantuan", 
+            "Jurusan Pilihan 1", 
+            "Jurusan Pilihan 2"
         ];
         
-        csv += row.join(delimiter) + newline;
-    });
+        // Buat baris header
+        let csvContent = headers.join(delimiter) + newline;
+        
+        // Buat baris data satu per satu
+        for (let i = 0; i < allData.length; i++) {
+            const data = allData[i];
+            
+            const row = [
+                (i + 1).toString(),
+                (data.no_pendaftaran || "").toString(),
+                (data.tgl_daftar || "").toString(),
+                (data.nama || "").toString(),
+                (data.nisn || "").toString(),
+                (data.tempat_lahir || "").toString(),
+                (data.tgl_lahir || "").toString(),
+                (data.jk || "").toString(),
+                (data.alamat || "").toString(),
+                (data.nohp || "").toString(),
+                (data.email || "").toString(),
+                (data.ayah || "").toString(),
+                (data.ibu || "").toString(),
+                (data.nik || "").toString(),
+                (data.kk || "").toString(),
+                (data.tgl_kk || "").toString(),
+                (data.asal_sekolah || "").toString(),
+                (data.npsn || "").toString(),
+                (data.bantuan || "").toString(),
+                (data.jurusan1 || "").toString(),
+                (data.jurusan2 || "").toString()
+            ];
+            
+            csvContent += row.join(delimiter) + newline;
+        }
+        
+        // Buat file dengan encoding UTF-8
+        const blob = new Blob(["\uFEFF" + csvContent], {type: "text/csv;charset=utf-8;"});
+        
+        // Download file
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.href = url;
+        const now = new Date();
+        const fileName = `data_ppdb_${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}.csv`;
+        link.setAttribute("download", fileName);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        showAlert(`✅ Berhasil export ${allData.length} data pendaftar! Buka file dengan Excel.`, "success");
+    }
     
-    // Buat file CSV dengan BOM (agar Excel bisa membaca UTF-8 dengan benar)
-    const blob = new Blob(["\uFEFF" + csv], {type: "text/csv;charset=utf-8;"});
-    
-    // Download file
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.href = url;
-    link.setAttribute("download", `data_ppdb_${new Date().toISOString().slice(0,10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    
-    showAlert("Data berhasil di-export ke CSV! File siap dibuka di Excel.", "success");
-}
+    function clearAllData() {
+        if (confirm("⚠️ PERINGATAN! Ini akan menghapus SEMUA data pendaftar.\n\nYakin ingin melanjutkan?")) {
+            localStorage.removeItem('ppdb_data_smk1_sudimoro');
+            showAlert("Semua data telah dihapus!", "success");
+            if (document.getElementById('adminTableBody')) {
+                loadAdminData();
+            }
+        }
+    }
     
     // ========== SUBMIT FORM ==========
     async function handleSubmit(e) {
