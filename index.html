@@ -956,8 +956,9 @@
             doc.setFontSize(8);
             doc.setTextColor(100, 100, 100);
             doc.text(`Dicetak pada: ${new Date().toLocaleString('id-ID')}`, 20, y);
-            doc.text('Dokumen ini adalah bukti pendaftaran resmi dari SMK Negeri 1 Sudimoro, silahkan dicetak dan dibawa pada saat verifikasi dan daftar ulang', 105, y, { align: 'center' });
-            
+            const footerText = 'Dokumen ini adalah bukti pendaftaran resmi dari SMK Negeri 1 Sudimoro, silahkan dicetak dan dibawa pada saat verifikasi dan daftar ulang';
+const splitText = doc.splitTextToSize(footerText, 150); // otomatis wrap
+doc.text(splitText, 105, y, { align: 'center' });
             doc.save(`FORMULIR_SPMB_${data.nama.replace(/\s/g, '_')}.pdf`);
         }
         
