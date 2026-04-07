@@ -711,8 +711,7 @@
         }
     });
     
-    // ========== SYNC KE GOOGLE SHEETS ==========
-    // ========== SYNC KE GOOGLE SHEETS ==========
+       // ========== SYNC KE GOOGLE SHEETS ==========
 async function syncToGoogleSheets() {
     const allData = getAllData();
     
@@ -751,6 +750,26 @@ async function syncToGoogleSheets() {
 }
 
 // ========== SIMPAN KE GOOGLE SHEETS SATU PER SATU ==========
+async function saveToGoogleSheets(formData) {
+    try {
+        const response = await fetch(GOOGLE_SHEETS_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'add',
+                data: formData
+            })
+        });
+        
+        const result = await response.json();
+        console.log('Saved to Google Sheets:', result);
+        return result;
+    } catch (error) {
+        console.error('Error saving to Google Sheets:', error);
+        throw error;
+    }
+}
+    // ========== SIMPAN KE GOOGLE SHEETS SATU PER SATU ==========
 async function saveToGoogleSheets(formData) {
     try {
         const response = await fetch(GOOGLE_SHEETS_API_URL, {
