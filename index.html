@@ -967,10 +967,20 @@
             doc.text('Tanda Tangan Calon Siswa', 160, y + 5, { align: 'center' });
             
             y += 20;
-            doc.setFontSize(8);
-            doc.setTextColor(100, 100, 100);
-            doc.text(`Dicetak pada: ${new Date().toLocaleString('id-ID')}`, 20, y);
-            doc.text('Dokumen ini adalah bukti pendaftaran resmi dari SMK Negeri 1 Sudimoro', 105, y, { align: 'center' });
+            // ========== FOOTER (RAPI - TIDAK MENUMPUK) ==========
+doc.setFontSize(8);
+doc.setFont('helvetica', 'italic');
+doc.setTextColor(100, 100, 100);
+
+// Tanggal cetak di KIRI BAWAH (posisi Y)
+doc.text(`Dicetak pada: ${new Date().toLocaleString('id-ID')}`, 20, y);
+
+// Teks footer di TENGAH (posisi Y yang SAMA, tapi tidak masalah karena beda sisi)
+const footerLine1 = 'Dokumen ini adalah bukti pendaftaran resmi dari';
+const footerLine2 = 'SMK Negeri 1 Sudimoro. Harap dibawa saat verifikasi dan daftar ulang.';
+
+doc.text(footerLine1, 105, y, { align: 'center' });
+doc.text(footerLine2, 105, y + 4, { align: 'center' });
             
             doc.save(`FORMULIR_SPMB_${data.nama.replace(/\s/g, '_')}.pdf`);
         }
