@@ -712,56 +712,76 @@
     });
     
     // ========== SYNC KE GOOGLE SHEETS ==========
-    async function syncToGoogleSheets() {
-        const allData = getAllData();
-        
-        if (allData.length === 0) {
-            showAlert("Tidak ada data untuk disinkronkan!", "error");
-            return;
-        }
-        
-        showAlert("Mengirim data ke Google Sheets...", "success");
-        
-        try {
-            // Kirim semua data sekaligus
-            const response = await fetch(GOOGLE_SHEETS_API_URL, {
-                method: 'POST',
-                mode: 'no-cors', // Untuk mengatasi CORS
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    action: 'syncAll',
-                    data: allData,
-                    timestamp: new Date().toISOString()
-                })
-            });
-            
-            showAlert(`✅ ${allData.length} data berhasil disinkronkan ke Google Sheets!`, "success");
-            
-        } catch (error) {
-            console.error('Error syncing:', error);
-            showAlert("Gagal menyinkronkan data. Periksa koneksi internet dan URL API.", "error");
-        }
+    // ========== SYNC KE GOOGLE SHEETS ==========
+async function syncToGoogleSheets() {
+    const allData = getAllData();
+    
+    if (allData.length === 0) {
+        showAlert("Tidak ada data untuk disinkronkan!", "error");
+        return;
     }
     
-    // ========== SIMPAN KE GOOGLE SHEETS SATU PER SATU ==========
-    async function saveToGoogleSheets(formData) {
-        try {
-            await fetch(GOOGLE_SHEETS_API_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'add',
-                    data: formData
-                })
-            });
-            console.log('Data saved to Google Sheets');
-        } catch (error) {
-            console.error('Error saving to Google Sheets:', error);
+    showAlert("Mengirim data ke Google Sheets...", "success");
+    
+    try {
+        const response = await fetch(GOOGLE_SHEETS_API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'syncAll',
+                data: allData,
+                timestamp: new Date().toISOString()
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            showAlert(`✅ ${allData.length} data berhasil disinkronkan!`, "success");
+        } else {
+            showAlert("Gagal: " + (result.message || "Unknown error"), "error");
         }
+        
+    } catch (error) {
+        console.error('Error syncing:', error);
+        showAlert("Gagal menyinkronkan data. Cek URL API dan koneksi internet.", "error");
     }
+}
+
+// ========== SIMPAN KE GOOGLE SHEETS SATU PER SATU ==========
+async function saveToGoogleSheets(formData) {
+    try {
+        const response = await fetch(GOOGLE_SHEETS_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'add',
+                data: formData
+            })
+        });
+        
+        const result = await response.json();
+        console.log('Saved to Google Sheets:', result);
+        return result;
+    } catch (error) {
+        console.error('Error saving to Google Sheets:', error);
+        throw error;
+    }
+}
+    
+    // ========== SIMPAN KE GOOGLE SHEETS SATU PER SATU ==========
+async function saveToGoogleSheets(formData) {
+    try {
+        const response = await fetch(GOOGLE_SHEETS_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'add',
+                data: formData
+            })
+        });
     
     // ========== DOWNLOAD FILE KK ==========
     function downloadKK(fileBase64, fileName) {
