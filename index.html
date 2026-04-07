@@ -764,202 +764,245 @@
         }
         
         // ==================== PDF GENERATION DENGAN LOGO ====================
-        function downloadPDF(data) {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-            
-            // ========== HEADER DENGAN LOGO ==========
-            // Logo Kiri (Pojok Kiri Atas)
-            if (LOGO_KIRI_BASE64 && LOGO_KIRI_BASE64 !== '') {
-                try {
-                    doc.addImage(LOGO_KIRI_BASE64, 'PNG', 15, 8, 22, 22);
-                } catch(e) {
-                    console.log('Gagal load logo kiri, menggunakan teks alternatif');
-                    doc.setFillColor(15, 23, 42);
-                    doc.circle(26, 19, 11, 'F');
-                    doc.setTextColor(212, 174, 109);
-                    doc.setFontSize(12);
-                    doc.text('SMK', 26, 22, { align: 'center' });
-                }
-            } else {
-                // Alternatif jika tidak ada logo
-                doc.setFillColor(15, 23, 42);
-                doc.circle(26, 19, 11, 'F');
-                doc.setTextColor(212, 174, 109);
-                doc.setFontSize(12);
-                doc.text('SMK', 26, 22, { align: 'center' });
-            }
-            
-            // Logo Kanan (Pojok Kanan Atas)
-            if (LOGO_KANAN_BASE64 && LOGO_KANAN_BASE64 !== '') {
-                try {
-                    doc.addImage(LOGO_KANAN_BASE64, 'PNG', 173, 8, 22, 22);
-                } catch(e) {
-                    console.log('Gagal load logo kanan, menggunakan teks alternatif');
-                    doc.setFillColor(15, 23, 42);
-                    doc.circle(184, 19, 11, 'F');
-                    doc.setTextColor(212, 174, 109);
-                    doc.setFontSize(12);
-                    doc.text('1', 184, 22, { align: 'center' });
-                }
-            } else {
-                // Alternatif jika tidak ada logo
-                doc.setFillColor(15, 23, 42);
-                doc.circle(184, 19, 11, 'F');
-                doc.setTextColor(212, 174, 109);
-                doc.setFontSize(12);
-                doc.text('1', 184, 22, { align: 'center' });
-            }
-            
-            // Nama Sekolah (Tengah)
-            doc.setTextColor(0, 0, 0);
-            doc.setFontSize(16);
-            doc.setFont('helvetica', 'bold');
-            doc.text('SMK NEGERI 1 SUDIMORO', 105, 16, { align: 'center' });
-            
-            doc.setFontSize(9);
-            doc.setFont('helvetica', 'normal');
-            doc.text('Jl. Raya Lorog Trenggalek Km.12, Desa Sukorejo, Kec.Sudimoro', 105, 24, { align: 'center' });
-            doc.text('Telp. (0357) 3219736 | Email: smkn1sudimoro@gmail.com', 105, 30, { align: 'center' });
-            
-            // Garis Pembatas
-            doc.setDrawColor(212, 174, 109);
-            doc.setLineWidth(0.5);
-            doc.line(15, 36, 195, 36);
-            doc.setDrawColor(0, 0, 0);
-            doc.setLineWidth(0.3);
-            doc.line(15, 37, 195, 37);
-            
-            // Judul Formulir
-            doc.setFontSize(14);
-            doc.setFont('helvetica', 'bold');
+        // ==================== PDF GENERATION (VERSI RAPI - TIDAK MENUMPUK) ====================
+function downloadPDF(data) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    
+    // ========== HEADER ==========
+    doc.setFillColor(15, 23, 42);
+    doc.rect(0, 0, 210, 45, 'F');
+    
+    // Logo kiri (jika ada)
+    if (LOGO_KIRI_BASE64 && LOGO_KIRI_BASE64 !== '') {
+        try {
+            doc.addImage(LOGO_KIRI_BASE64, 'PNG', 15, 8, 22, 22);
+        } catch(e) {
+            doc.setFillColor(212, 174, 109);
+            doc.circle(26, 19, 11, 'F');
             doc.setTextColor(15, 23, 42);
-            doc.text('FORMULIR PENDAFTARAN', 105, 52, { align: 'center' });
-            
-            doc.setFontSize(9);
-            doc.setFont('helvetica', 'normal');
-            doc.text('SISTEM PENERIMAAN MURID BARU (SPMB) TAHUN AJARAN 2026/2027', 105, 60, { align: 'center' });
-            
-            doc.setDrawColor(212, 174, 109);
-            doc.setLineWidth(0.5);
-            doc.line(50, 64, 160, 64);
-            
-            let y = 78;
-            
-            // A. DATA PRIBADI
-            doc.setFillColor(240, 240, 240);
-            doc.rect(15, y-5, 180, 8, 'F');
-            doc.setFont('helvetica', 'bold');
-            doc.text('A. DATA PRIBADI CALON SISWA', 20, y);
-            y += 12;
-            
-            const dataFields = [
-                ['Nomor Pendaftaran', data.no_pendaftaran],
-                ['Tanggal Daftar', data.tgl_daftar],
-                ['Nama Lengkap', data.nama],
-                ['NISN', data.nisn],
-                ['Tempat, Tanggal Lahir', `${data.tempat_lahir}, ${data.tgl_lahir}`],
-                ['Jenis Kelamin', data.jk],
-                ['Alamat Lengkap', data.alamat],
-                ['No. HP/WhatsApp', data.nohp],
-                ['Email', data.email || '-']
-            ];
-            
-            doc.setFont('helvetica', 'normal');
-            for (const [label, value] of dataFields) {
-                doc.setFont('helvetica', 'bold');
-                doc.text(`${label}:`, 20, y);
-                doc.setFont('helvetica', 'normal');
-                const lines = doc.splitTextToSize(String(value || '-'), 100);
-                doc.text(lines, 70, y);
-                y += (lines.length * 5) + 3;
-                if (y > 270) {
-                    doc.addPage();
-                    y = 20;
-                }
-            }
-            
-            y += 5;
-            
-            // B. DATA ORANG TUA
-            doc.setFillColor(240, 240, 240);
-            doc.rect(15, y-5, 180, 8, 'F');
-            doc.setFont('helvetica', 'bold');
-            doc.text('B. DATA ORANG TUA', 20, y);
-            y += 12;
-            
-            const parentFields = [
-                ['Nama Ayah Kandung', data.ayah],
-                ['Nama Ibu Kandung', data.ibu],
-                ['NIK Siswa', data.nik],
-                ['Nomor Kartu Keluarga', data.kk],
-                ['Tanggal Terbit KK', data.tgl_kk]
-            ];
-            
-            doc.setFont('helvetica', 'normal');
-            for (const [label, value] of parentFields) {
-                doc.setFont('helvetica', 'bold');
-                doc.text(`${label}:`, 20, y);
-                doc.setFont('helvetica', 'normal');
-                doc.text(String(value || '-'), 70, y);
-                y += 7;
-                if (y > 270) {
-                    doc.addPage();
-                    y = 20;
-                }
-            }
-            
-            y += 5;
-            
-            // C. DATA PENDIDIKAN
-            doc.setFillColor(240, 240, 240);
-            doc.rect(15, y-5, 180, 8, 'F');
-            doc.setFont('helvetica', 'bold');
-            doc.text('C. DATA PENDIDIKAN & PILIHAN JURUSAN', 20, y);
-            y += 12;
-            
-            const schoolFields = [
-                ['Asal Sekolah', data.asal_sekolah],
-                ['NPSN Sekolah Asal', data.npsn],
-                ['Kartu Bantuan', data.bantuan],
-                ['Jurusan Pilihan 1', data.jurusan1],
-                ['Jurusan Pilihan 2', data.jurusan2],
-                ['Status Upload KK', data.upload_status]
-            ];
-            
-            doc.setFont('helvetica', 'normal');
-            for (const [label, value] of schoolFields) {
-                doc.setFont('helvetica', 'bold');
-                doc.text(`${label}:`, 20, y);
-                doc.setFont('helvetica', 'normal');
-                const lines = doc.splitTextToSize(String(value || '-'), 100);
-                doc.text(lines, 70, y);
-                y += (lines.length * 5) + 3;
-                if (y > 270) {
-                    doc.addPage();
-                    y = 20;
-                }
-            }
-            
-            y += 15;
-            
-            // Tanda tangan
-            doc.setDrawColor(200, 200, 200);
-            doc.setLineWidth(0.3);
-            doc.line(20, y, 80, y);
-            doc.line(130, y, 190, y);
-            doc.setFontSize(9);
-            doc.text('Tanda Tangan Orang Tua/Wali', 50, y + 5, { align: 'center' });
-            doc.text('Tanda Tangan Calon Siswa', 160, y + 5, { align: 'center' });
-            
-            y += 20;
-            doc.setFontSize(8);
-            doc.setTextColor(100, 100, 100);
-            doc.text(`Dicetak pada: ${new Date().toLocaleString('id-ID')}`, 20, y);
-            const footerText = 'Dokumen ini adalah bukti pendaftaran resmi dari SMK Negeri 1 Sudimoro, silahkan dicetak dan dibawa pada saat verifikasi dan daftar ulang';
-const splitText = doc.splitTextToSize(footerText, 150); // otomatis wrap
-doc.text(splitText, 105, y, { align: 'center' });
-            doc.save(`FORMULIR_SPMB_${data.nama.replace(/\s/g, '_')}.pdf`);
+            doc.setFontSize(12);
+            doc.text('SMK', 26, 22, { align: 'center' });
+        }
+    }
+    
+    // Logo kanan (jika ada)
+    if (LOGO_KANAN_BASE64 && LOGO_KANAN_BASE64 !== '') {
+        try {
+            doc.addImage(LOGO_KANAN_BASE64, 'PNG', 173, 8, 22, 22);
+        } catch(e) {
+            doc.setFillColor(212, 174, 109);
+            doc.circle(184, 19, 11, 'F');
+            doc.setTextColor(15, 23, 42);
+            doc.setFontSize(12);
+            doc.text('1', 184, 22, { align: 'center' });
+        }
+    }
+    
+    // Nama sekolah
+    doc.setTextColor(212, 174, 109);
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text('SMK NEGERI 1 SUDIMORO', 105, 18, { align: 'center' });
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Jl. Raya Lorog Trenggalek Km.12, Desa Sukorejo, Kec.Sudimoro', 105, 26, { align: 'center' });
+    doc.text('Telp. (0357) 3219736 | Email: smkn1sudimoro@gmail.com', 105, 32, { align: 'center' });
+    
+    // Garis header
+    doc.setDrawColor(212, 174, 109);
+    doc.setLineWidth(0.5);
+    doc.line(15, 38, 195, 38);
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.3);
+    doc.line(15, 39, 195, 39);
+    
+    // ========== JUDUL ==========
+    doc.setTextColor(15, 23, 42);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('FORMULIR PENDAFTARAN SPMB', 105, 55, { align: 'center' });
+    
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.text('SISTEM PENERIMAAN MURID BARU (SPMB) TAHUN AJARAN 2026/2027', 105, 63, { align: 'center' });
+    
+    doc.setDrawColor(212, 174, 109);
+    doc.setLineWidth(0.5);
+    doc.line(50, 67, 160, 67);
+    
+    let y = 82;
+    
+    // ========== A. DATA PRIBADI ==========
+    doc.setFillColor(240, 240, 240);
+    doc.rect(15, y-5, 180, 7, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.text('A. DATA PRIBADI CALON SISWA', 20, y);
+    y += 11;
+    
+    const dataFields = [
+        ['Nomor Pendaftaran', data.no_pendaftaran],
+        ['Tanggal Daftar', data.tgl_daftar],
+        ['Nama Lengkap', data.nama],
+        ['NISN', data.nisn],
+        ['Tempat, Tanggal Lahir', `${data.tempat_lahir}, ${data.tgl_lahir}`],
+        ['Jenis Kelamin', data.jk],
+        ['Alamat Lengkap', data.alamat],
+        ['No. HP/WhatsApp', data.nohp],
+        ['Email', data.email || '-']
+    ];
+    
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    
+    for (const [label, value] of dataFields) {
+        // Cek apakah perlu pindah halaman
+        if (y > 265) {
+            doc.addPage();
+            y = 20;
+        }
+        
+        doc.setFont('helvetica', 'bold');
+        doc.text(`${label}:`, 20, y);
+        doc.setFont('helvetica', 'normal');
+        
+        const valueStr = String(value || '-');
+        const maxWidth = 100;
+        const lines = doc.splitTextToSize(valueStr, maxWidth);
+        
+        doc.text(lines, 70, y);
+        y += (lines.length * 5) + 2;
+    }
+    
+    y += 5;
+    
+    // ========== B. DATA ORANG TUA ==========
+    if (y > 265) {
+        doc.addPage();
+        y = 20;
+    }
+    
+    doc.setFillColor(240, 240, 240);
+    doc.rect(15, y-5, 180, 7, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.text('B. DATA ORANG TUA', 20, y);
+    y += 11;
+    
+    const parentFields = [
+        ['Nama Ayah Kandung', data.ayah],
+        ['Nama Ibu Kandung', data.ibu],
+        ['NIK Siswa', data.nik],
+        ['Nomor Kartu Keluarga', data.kk],
+        ['Tanggal Terbit KK', data.tgl_kk]
+    ];
+    
+    for (const [label, value] of parentFields) {
+        if (y > 270) {
+            doc.addPage();
+            y = 20;
+        }
+        
+        doc.setFont('helvetica', 'bold');
+        doc.text(`${label}:`, 20, y);
+        doc.setFont('helvetica', 'normal');
+        doc.text(String(value || '-'), 70, y);
+        y += 6;
+    }
+    
+    y += 5;
+    
+    // ========== C. DATA PENDIDIKAN ==========
+    if (y > 265) {
+        doc.addPage();
+        y = 20;
+    }
+    
+    doc.setFillColor(240, 240, 240);
+    doc.rect(15, y-5, 180, 7, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.text('C. DATA PENDIDIKAN & PILIHAN JURUSAN', 20, y);
+    y += 11;
+    
+    const schoolFields = [
+        ['Asal Sekolah', data.asal_sekolah],
+        ['NPSN Sekolah Asal', data.npsn],
+        ['Kartu Bantuan', data.bantuan],
+        ['Jurusan Pilihan 1', data.jurusan1],
+        ['Jurusan Pilihan 2', data.jurusan2],
+        ['Status Upload KK', data.upload_status || 'Terupload']
+    ];
+    
+    for (const [label, value] of schoolFields) {
+        if (y > 270) {
+            doc.addPage();
+            y = 20;
+        }
+        
+        doc.setFont('helvetica', 'bold');
+        doc.text(`${label}:`, 20, y);
+        doc.setFont('helvetica', 'normal');
+        
+        const valueStr = String(value || '-');
+        const maxWidth = 100;
+        const lines = doc.splitTextToSize(valueStr, maxWidth);
+        
+        doc.text(lines, 70, y);
+        y += (lines.length * 5) + 2;
+    }
+    
+    y += 10;
+    
+    // ========== TANDA TANGAN (DIPERBAIKI) ==========
+    // Cek apakah masih ada ruang untuk tanda tangan (minimal 25mm)
+    if (y > 265) {
+        doc.addPage();
+        y = 20;
+    }
+    
+    doc.setDrawColor(180, 180, 180);
+    doc.setLineWidth(0.3);
+    
+    // Garis tanda tangan kiri (orang tua)
+    doc.line(20, y, 85, y);
+    // Garis tanda tangan kanan (siswa)
+    doc.line(125, y, 190, y);
+    
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(80, 80, 80);
+    
+    doc.text('Tanda Tangan Orang Tua/Wali', 52.5, y + 5, { align: 'center' });
+    doc.text('Tanda Tangan Calon Siswa', 157.5, y + 5, { align: 'center' });
+    
+    y += 15;
+    
+    // ========== FOOTER (DIPERBAIKI - TEKS TIDAK MENUMPUK) ==========
+    if (y > 280) {
+        doc.addPage();
+        y = 20;
+    }
+    
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'italic');
+    doc.setTextColor(100, 100, 100);
+    
+    // Tanggal cetak (kiri)
+    doc.text(`Dicetak pada: ${new Date().toLocaleString('id-ID')}`, 20, y);
+    
+    // Teks footer (tengah) - DI PECAH MENJADI 2 BARIS AGAR TIDAK MENUMPUK
+    const footerLine1 = 'Dokumen ini adalah bukti pendaftaran resmi dari';
+    const footerLine2 = 'SMK Negeri 1 Sudimoro. Harap dibawa saat verifikasi dan daftar ulang.';
+    
+    doc.text(footerLine1, 105, y, { align: 'center' });
+    doc.text(footerLine2, 105, y + 4, { align: 'center' });
+    
+    // ========== SIMPAN PDF ==========
+    const safeFileName = data.nama.replace(/\s/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
+    doc.save(`FORMULIR_SPMB_${safeFileName}.pdf`);
+}
         }
         
         // ==================== ADMIN MODAL ====================
